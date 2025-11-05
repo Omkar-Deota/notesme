@@ -3,10 +3,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:notesme/firebase_options.dart';
 import 'package:notesme/views/login_view.dart';
+import 'package:notesme/views/notes_view.dart';
 import 'package:notesme/views/register_view.dart';
+import 'package:notesme/views/verify_email_view.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  // await dotenv.load(fileName:".env");
   runApp(
     MaterialApp(
       title: 'Flutter Demo',
@@ -14,6 +17,12 @@ void main() {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       home: const HomePage(),
+      routes: {
+        "/login/": (context) => const LoginView(),
+        "/register/": (context) => const RegisterView(),
+        "/verify-user/": (context) => const VerifyEmailView(),
+        "/home/": (context) => const NotesView(),
+      },
     ),
   );
 }
@@ -21,38 +30,29 @@ void main() {
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  bool isEmailVerified() {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user?.emailVerified ?? false) {
-      return true;
-    }
-    return false;
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Note Me"),
-        backgroundColor: Colors.greenAccent,
-      ),
-      body: FutureBuilder(
+    return FutureBuilder(
         future: Firebase.initializeApp(
           options: DefaultFirebaseOptions.currentPlatform,
         ),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.done:
-              if (isEmailVerified()) {
-                return const Text('Done');
-              } else {
-                return const Text("Email verification Pending");
-              }
+            final user = FirebaseAuth.instance.currentUser;
+            if (user != null && !user.emailVerified) {
+              return const VerifyEmailView();
+            }
+
+            if (user != null && user.emailVerified) {
+              return const Text("Verified User");
+            }
+
+            return const NotesView();
             default:
-              return const Text("Loading");
+            return const CircularProgressIndicator();
           }
-        },
-      ),
+      }
     );
   }
 }

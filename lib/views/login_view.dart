@@ -37,10 +37,36 @@ class _LoginViewState extends State<LoginView> {
     try {
       final userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
-      print(userCredential);
+      
+      if (userCredential.user?.emailVerified == true) {
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil('/home/', (route) => false);
+      } else {
+        AlertDialog(
+          title: const Text('Error'),
+          content: const Text('Please Verify Your Account!'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/verify-user/', (route) => false);
+              },
+              child: const Text('Verify Now'),
+            ),
+          ],
+        );
+      }
     } catch (e) {
       print(e.toString());
     }
+  }
+
+  void onSignUpButtonPress() {
+    Navigator.of(
+      context,
+    ).pushNamedAndRemoveUntil('/register/', (route) => false);
   }
 
   @override
@@ -82,6 +108,10 @@ class _LoginViewState extends State<LoginView> {
                   TextButton(
                     onPressed: handleButtonPress,
                     child: const Text("Login"),
+                  ),
+                  TextButton(
+                    onPressed: onSignUpButtonPress,
+                    child: const Text("Sign up!!"),
                   ),
                 ],
               );

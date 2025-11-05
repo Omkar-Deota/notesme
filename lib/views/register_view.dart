@@ -37,10 +37,17 @@ class _RegisterViewState extends State<RegisterView> {
     try {
       final userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
-      print(userCredential);
+    if(userCredential.user != null){
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil("/verify-user/", (route) => false);
+    }
     } catch (e) {
       print(e.toString());
     }
+  }
+
+  void onRedirectLoginPress() {
+    Navigator.of(context).pushNamedAndRemoveUntil('/login/', (route) => false);
   }
 
   @override
@@ -82,6 +89,10 @@ class _RegisterViewState extends State<RegisterView> {
                   TextButton(
                     onPressed: handleButtonPress,
                     child: const Text("Register"),
+                  ),
+                  TextButton(
+                    onPressed: onRedirectLoginPress,
+                    child: const Text("Back to login!!"),
                   ),
                 ],
               );

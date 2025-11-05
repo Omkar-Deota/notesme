@@ -49,7 +49,7 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static final FirebaseOptions android = FirebaseOptions(
+  static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCdcVkjRKlV3mgOOd-TuXuXuSQssP9fsOo',
     appId: '1:90453480965:android:762c34960628f1e0626e6c',
     messagingSenderId: '90453480965',
@@ -57,7 +57,7 @@ class DefaultFirebaseOptions {
     storageBucket: 'notesdb-flutter-project.firebasestorage.app',
   );
 
-  static final FirebaseOptions ios = FirebaseOptions(
+  static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyA71qmxILWiU9E8M9nWZWZpCwiqGFo7amo',
     appId: '1:90453480965:ios:22abe03f3951910f626e6c',
     messagingSenderId: '90453480965',
