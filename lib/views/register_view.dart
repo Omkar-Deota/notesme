@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:notesme/constants/routes.dart';
 import 'package:notesme/firebase_options.dart';
+import 'package:notesme/shared/error_dailog.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -32,22 +34,24 @@ class _RegisterViewState extends State<RegisterView> {
     final email = _email.text;
     final password = _password.text;
 
-    print("$password $email");
+   
+    final userCredential = await FirebaseAuth.instance
+        .createUserWithEmailAndPassword(email: email, password: password);
 
-    try {
-      final userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: email, password: password);
+    if (!mounted) {
+      return;
+    }
+
     if(userCredential.user != null){
       Navigator.of(context)
-          .pushNamedAndRemoveUntil("/verify-user/", (route) => false);
-    }
-    } catch (e) {
-      print(e.toString());
+          .pushNamedAndRemoveUntil(verifyUserRoute, (route) => false);
+    } else {
+      showErrorDailog(context, "Error creating user!");
     }
   }
 
   void onRedirectLoginPress() {
-    Navigator.of(context).pushNamedAndRemoveUntil('/login/', (route) => false);
+    Navigator.of(context).pushNamedAndRemoveUntil(loginRoute, (route) => false);
   }
 
   @override

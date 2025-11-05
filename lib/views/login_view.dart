@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:notesme/constants/routes.dart';
 import 'package:notesme/firebase_options.dart';
+import 'package:notesme/shared/error_dailog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -32,41 +34,28 @@ class _LoginViewState extends State<LoginView> {
     final email = _email.text;
     final password = _password.text;
 
-    print("$password $email");
+    final userCredential = await FirebaseAuth.instance
+        .signInWithEmailAndPassword(email: email, password: password);
 
-    try {
-      final userCredential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password);
+    if (!mounted) return;
       
-      if (userCredential.user?.emailVerified == true) {
+    if (userCredential.user?.emailVerified == true) {
         Navigator.of(
           context,
-        ).pushNamedAndRemoveUntil('/home/', (route) => false);
-      } else {
-        AlertDialog(
-          title: const Text('Error'),
-          content: const Text('Please Verify Your Account!'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(
-                  context,
-                ).pushNamedAndRemoveUntil('/verify-user/', (route) => false);
-              },
-              child: const Text('Verify Now'),
-            ),
-          ],
-        );
-      }
-    } catch (e) {
-      print(e.toString());
+      ).pushNamedAndRemoveUntil(notesRoute, (route) => false);
+    } else {
+      showErrorDailog(context, 'Please Verify Your Account!', () {
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil(verifyUserRoute, (route) => false);
+      });
     }
   }
 
   void onSignUpButtonPress() {
     Navigator.of(
       context,
-    ).pushNamedAndRemoveUntil('/register/', (route) => false);
+    ).pushNamedAndRemoveUntil(registerRoute, (route) => false);
   }
 
   @override
