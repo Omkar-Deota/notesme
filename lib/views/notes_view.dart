@@ -1,6 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:notesme/constants/routes.dart';
+import 'package:notesme/enum/menu_action.dart';
+import 'package:notesme/services/auth/auth_service.dart';
+import 'package:notesme/shared/logout_dailog.dart';
 
 class NotesView extends StatefulWidget {
   const NotesView({super.key});
@@ -9,32 +11,11 @@ class NotesView extends StatefulWidget {
   State<NotesView> createState() => _NotesViewState();
 }
 
-enum MenuAction { logout }
-
 class _NotesViewState extends State<NotesView> {
   void handleLogout() async {
-    await FirebaseAuth.instance.signOut();
+    await AuthService.firebase().logout();
     if (!mounted) return;
     Navigator.of(context).pushNamedAndRemoveUntil(loginRoute, (route) => false);
-  }
-
-  Future<bool?> showLogoutDailog(BuildContext context) {
-    return showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure want to logout ?'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: const Text('Cancel'),
-          ),
-          TextButton(onPressed: handleLogout, child: const Text("Logout")),
-        ],
-      ),
-    );
   }
 
   @override
@@ -48,7 +29,7 @@ class _NotesViewState extends State<NotesView> {
             onSelected: (value) {
               switch (value) {
                 case MenuAction.logout:
-                  showLogoutDailog(context);
+                  showLogoutDailog(context, handleLogout);
               }
             },
             itemBuilder: (context) => [
@@ -62,7 +43,7 @@ class _NotesViewState extends State<NotesView> {
       ),
       body: Scaffold(
         body: Center(
-          child: Text('Hello ${FirebaseAuth.instance.currentUser?.email}'),
+          child: Text('Hello World!'),
         ),
       ),
     );

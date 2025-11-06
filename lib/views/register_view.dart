@@ -1,8 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:notesme/constants/routes.dart';
-import 'package:notesme/firebase_options.dart';
+import 'package:notesme/services/auth/auth_exception.dart';
+import 'package:notesme/services/auth/auth_service.dart';
 import 'package:notesme/shared/error_dailog.dart';
 
 class RegisterView extends StatefulWidget {
@@ -34,19 +33,29 @@ class _RegisterViewState extends State<RegisterView> {
     final email = _email.text;
     final password = _password.text;
 
-   
-    final userCredential = await FirebaseAuth.instance
-        .createUserWithEmailAndPassword(email: email, password: password);
+    try {
+      final userCredential = await AuthService.firebase().createUser(
+        email: email,
+        password: password,
+      );
 
-    if (!mounted) {
-      return;
-    }
+      if (!mounted) {
+        return;
+      }
 
-    if(userCredential.user != null){
-      Navigator.of(context)
-          .pushNamedAndRemoveUntil(verifyUserRoute, (route) => false);
-    } else {
-      showErrorDailog(context, "Error creating user!");
+      if (userCredential.isEmailVerified) {
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil(verifyUserRoute, (route) => false);
+      }
+    } on WeakPasswordAuthException {
+      await showErrorDailog(context, "Weak Password");
+    } on EmailAlreadyInUseAuthException {
+      await showErrorDailog(context, "Email already in use");
+    } on InvalidEmailAuthException {
+      await showErrorDailog(context, "Invalid Email");
+    } on GenericAuthException catch (e) {
+      await showErrorDailog(context, e.toString());
     }
   }
 
@@ -63,47 +72,31 @@ class _RegisterViewState extends State<RegisterView> {
           seedColor: Colors.deepPurple,
         ).inversePrimary,
       ),
-      body: FutureBuilder(
-        future: Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform,
-        ),
-        builder: (context, snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.done:
-              return Column(
-                children: [
-                  TextField(
-                    controller: _email,
-                    decoration: InputDecoration(
-                      hintText: "Enter your Email...",
-                    ),
-                    autocorrect: false,
-                    enableSuggestions: false,
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  TextField(
-                    controller: _password,
-                    decoration: InputDecoration(
-                      hintText: "Enter your Password...",
-                    ),
-                    obscureText: true,
-                    autocorrect: false,
-                    enableSuggestions: false,
-                  ),
-                  TextButton(
-                    onPressed: handleButtonPress,
-                    child: const Text("Register"),
-                  ),
-                  TextButton(
-                    onPressed: onRedirectLoginPress,
-                    child: const Text("Back to login!!"),
-                  ),
-                ],
-              );
-            default:
-              return Text("Loading");
-          }
-        },
+      body: Column(
+        children: [
+          TextField(
+            controller: _email,
+            decoration: InputDecoration(hintText: "Enter your Email..."),
+            autocorrect: false,
+            enableSuggestions: false,
+            keyboardType: TextInputType.emailAddress,
+          ),
+          TextField(
+            controller: _password,
+            decoration: InputDecoration(hintText: "Enter your Password..."),
+            obscureText: true,
+            autocorrect: false,
+            enableSuggestions: false,
+          ),
+          TextButton(
+            onPressed: handleButtonPress,
+            child: const Text("Register"),
+          ),
+          TextButton(
+            onPressed: onRedirectLoginPress,
+            child: const Text("Back to login!!"),
+          ),
+        ],
       ),
     );
   }
